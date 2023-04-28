@@ -23,7 +23,7 @@ export interface Meta {
   range: string;
 }
 
-export interface Items { 
+export interface Items {
   [x: string]: StockHistory;
 }
 

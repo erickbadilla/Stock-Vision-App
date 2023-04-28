@@ -40,4 +40,4 @@ This app was built as part of a coding challenge. It uses the Alpha Vantage API 
 
 ## License
 
-This project is licensed under the MIT License. See the LICENSE file for more information.
+This project is licensed under the GNU GPL-3.0 License. See the LICENSE file for more information.

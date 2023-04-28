@@ -45,8 +45,9 @@ export const RealtimeStockPrice: FunctionComponent<
     return symbols.join(",");
   }, [symbols]);
 
+  //Refreshes every 5 minutes to avoid api limit.
   const { data } = useSWR(`api/stocks?symbols=${symbolsQuery}`, fetcher, {
-    refreshInterval: 60000,
+    refreshInterval: 300000,
     fallbackData: {
       labels: [],
       datasets: [],

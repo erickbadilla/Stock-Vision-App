@@ -29,7 +29,7 @@ Stocks App is built using the following technologies:
 
 Stocks App comes with the following features:
 
-- Real-time update of stock prices every 5 seconds.
+- Real-time update of stock prices every 5 minutes.
 - Ability to track multiple companies.
 - Legend to show/hide individual stock prices in the chart.
 - Tooltips to display the price of a stock at a specific point in time.

@@ -64,7 +64,7 @@ const handler: TNextAPIHandler<IRealtimeData> = async (req, res) => {
         const stockPrices = Object.entries(timeSeriesData).map(
           ([timeString, data]) => {
             return {
-              x: timeString,
+              x: new Date(timeString).toLocaleString(),
               y: parseFloat(data["4. close"]),
             };
           }

@@ -25,6 +25,22 @@ ChartJS.register(
   Legend
 );
 
+const CHART_OPTIONS: object = {
+  scales: {
+    x: {
+      reverse: true,
+      beginAtZero: true,
+    },
+  },
+  normalized: true,
+  responsive: true,
+  layout: {
+    padding: 80,
+  },
+  maintainAspectRatio: true,
+  aspectRatio: 2,
+};
+
 interface IRealTimeStockPriceProps {
   symbols: string[];
 }
@@ -62,5 +78,5 @@ export const RealtimeStockPrice: FunctionComponent<
     },
   });
 
-  return <Line data={data} />;
+  return <Line data={data} options={CHART_OPTIONS} />;
 };

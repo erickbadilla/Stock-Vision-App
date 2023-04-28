@@ -5,6 +5,7 @@ import { FunctionComponent } from "react";
 interface IToaster {}
 
 const ALERT_SX: SxProps = {
+  marginTop: "0.8rem",
   width: "100%",
   padding: "24px",
   fontSize: "1.2rem",

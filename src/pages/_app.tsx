@@ -35,20 +35,24 @@ const App: NextComponentType<AppContext, AppInitialProps, IAppProps> = ({
     Component.getLayout ??
     ((page: ReactNode) => <MainLayout>{page}</MainLayout>);
 
-  return getLayout(
-    <>
-      <style jsx global>{`
-        html {
-          font-family: ${RobotoSlab.style.fontFamily};
-        }
-      `}</style>
+  return (
+    <CacheProvider value={emotionCache}>
+      {getLayout(
+        <>
+          <style jsx global>{`
+            html {
+              font-family: ${RobotoSlab.style.fontFamily};
+            }
+          `}</style>
 
-      <CacheProvider value={emotionCache}>
-        <ToasterProvider>
-          <Component {...pageProps} />
-        </ToasterProvider>
-      </CacheProvider>
-    </>
+          <CacheProvider value={emotionCache}>
+            <ToasterProvider>
+              <Component {...pageProps} />
+            </ToasterProvider>
+          </CacheProvider>
+        </>
+      )}
+    </CacheProvider>
   );
 };
 

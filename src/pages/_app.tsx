@@ -13,6 +13,7 @@ import { ReactNode } from "react";
 import { ToasterProvider } from "@/common/contexts/toaster/provider/toaster.context";
 import { CacheProvider, EmotionCache } from "@emotion/react";
 import createEmotionCache from "@/common/utils/emotion/create-emotion-cache";
+import { ThemeProvider } from "@mui/material";
 
 export interface IAppProps extends AppLayoutProps {
   emotionCache?: EmotionCache;
@@ -25,6 +26,8 @@ const RobotoSlab = Roboto_Slab({
 });
 
 const clientSideEmotionCache = createEmotionCache();
+
+const theme = {};
 
 const App: NextComponentType<AppContext, AppInitialProps, IAppProps> = ({
   Component,
@@ -45,11 +48,11 @@ const App: NextComponentType<AppContext, AppInitialProps, IAppProps> = ({
             }
           `}</style>
 
-          <CacheProvider value={emotionCache}>
+          <ThemeProvider theme={theme}>
             <ToasterProvider>
               <Component {...pageProps} />
             </ToasterProvider>
-          </CacheProvider>
+          </ThemeProvider>
         </>
       )}
     </CacheProvider>

@@ -16,7 +16,10 @@ import { RealtimeStockPrice } from "@/dashboard/components/realtime-stock-price/
 import { Toaster } from "@/common/components/toaster/toaster.component";
 import { useToaster } from "@/common/contexts/toaster/hook/use-toaster.hook";
 import styles from "../styles/dashbord.module.css";
+import { TabPanel } from "@/common/components/tabs/tab-panel.component";
+import { GetServerSideProps } from "next";
 
+//Fetcher for search company form
 const fetchCompanies = async (query: string): Promise<ISearchFormOption[]> => {
   const response = await fetch(`/api/stocks/company/bestmatches/${query}`);
   const { data } =
@@ -25,43 +28,45 @@ const fetchCompanies = async (query: string): Promise<ISearchFormOption[]> => {
   return data;
 };
 
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: number;
-  value: number;
+interface IDashboardServerSideProps {
+  tableCompanies: IStockVisionCompanyInfo[];
+  companiesCache: [string, IStockVisionCompanyInfo][];
+  tableCompaniesCache: [string, IStockVisionCompanyInfo][];
 }
 
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
+export const getServerSideProps: GetServerSideProps<
+  IDashboardServerSideProps
+> = async () => {
+  const companiesCache: IDashboardServerSideProps["companiesCache"] = [];
+  const tableCompaniesCache: IDashboardServerSideProps["tableCompaniesCache"] =
+    [];
 
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`simple-tabpanel-${index}`}
-      aria-labelledby={`simple-tab-${index}`}
-      {...other}
-    >
-      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
-    </div>
-  );
-}
+  return {
+    props: {
+      tableCompanies: [],
+      companiesCache,
+      tableCompaniesCache,
+    },
+  };
+};
 
-const Dashboard: FunctionComponent = () => {
+const Dashboard: FunctionComponent<IDashboardServerSideProps> = (
+  serverSideProps
+) => {
   //Used for caching purposes
   const [companiesCache] = useState<Map<string, IStockVisionCompanyInfo>>(
-    new Map()
+    new Map(serverSideProps.companiesCache)
   );
 
   //Table Data Store
   const [tableCompaniesMap] = useState<Map<string, IStockVisionCompanyInfo>>(
-    new Map()
+    new Map(serverSideProps.tableCompaniesCache)
   );
 
   // Interface for updating table data, small optimization avoids ON + ON -> ON
   const [tableCompanies, setTableCompanies] = useState<
     IStockVisionCompanyInfo[]
-  >([]);
+  >(serverSideProps.tableCompanies);
 
   const [currentFormTab, setCurrentFormTab] = useState<number>(0);
 
@@ -155,6 +160,10 @@ const Dashboard: FunctionComponent = () => {
     [addMessage, tableCompaniesMap]
   );
 
+  const handleSelectCurrentTab = (_: unknown, value: number) => {
+    setCurrentFormTab(value);
+  };
+
   const symbols = tableCompanies.map(({ tickerSymbol }) => tickerSymbol);
 
   return (
@@ -176,12 +185,7 @@ const Dashboard: FunctionComponent = () => {
         />
 
         <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-          <Tabs
-            value={currentFormTab}
-            onChange={(_, value) => {
-              setCurrentFormTab(value);
-            }}
-          >
+          <Tabs value={currentFormTab} onChange={handleSelectCurrentTab}>
             <Tab label="Company Search" />
             <Tab label="Stock Price Search" />
           </Tabs>

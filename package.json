@@ -1,5 +1,5 @@
 {
-  "name": "stocks",
+  "name": "stock_vision_app",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,14 +9,28 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@emotion/react": "^11.10.6",
+    "@emotion/styled": "^11.10.6",
+    "@hookform/resolvers": "^3.1.0",
+    "@mui/icons-material": "^5.11.16",
+    "@mui/material": "^5.12.2",
+    "@mui/x-data-grid": "^6.2.1",
     "@types/node": "18.16.1",
     "@types/react": "18.2.0",
     "@types/react-dom": "18.2.1",
+    "chart.js": "^4.2.1",
     "eslint": "8.39.0",
     "eslint-config-next": "13.3.1",
     "next": "13.3.1",
     "react": "18.2.0",
+    "react-chartjs-2": "^5.2.0",
     "react-dom": "18.2.0",
-    "typescript": "5.0.4"
+    "react-hook-form": "^7.43.9",
+    "react-is": "^18.2.0",
+    "styled-components": "^5.3.10",
+    "swr": "^2.1.5",
+    "typescript": "5.0.4",
+    "use-debounce": "^9.0.4",
+    "zod": "^3.21.4"
   }
 }

@@ -1,114 +1,222 @@
-import Head from 'next/head'
-import Image from 'next/image'
-import { Inter } from 'next/font/google'
-import styles from '@/styles/Home.module.css'
+import Head from "next/head";
+import { FunctionComponent, useCallback, useState } from "react";
+import {
+  ISearchFormOption,
+  SearchForm,
+} from "@/common/components/search-form/search-form.component";
+import { CompanyTable } from "@/dashboard/components/company-table/company-table.component";
+import { IStockVisionBestMatches } from "./api/stocks/company/bestmatches/[search]";
+import { ISuccessResponse } from "@/common/utils/api/response/api-response";
+import {
+  IStockVisionCompanyInfo,
+  TStockVisionCompaniesInfo,
+} from "./api/stocks/company";
+import { Box, Tab, Tabs } from "@mui/material";
+import { RealtimeStockPrice } from "@/dashboard/components/realtime-stock-price/realtime-stock-price.component";
+import { Toaster } from "@/common/components/toaster/toaster.component";
+import { useToaster } from "@/common/contexts/toaster/hook/use-toaster.hook";
+import styles from "../styles/dashbord.module.css";
 
-const inter = Inter({ subsets: ['latin'] })
+const fetchCompanies = async (query: string): Promise<ISearchFormOption[]> => {
+  const response = await fetch(`/api/stocks/company/bestmatches/${query}`);
+  const { data } =
+    (await response.json()) as ISuccessResponse<IStockVisionBestMatches>;
 
-export default function Home() {
+  return data;
+};
+
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
+}
+
+function TabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`simple-tabpanel-${index}`}
+      aria-labelledby={`simple-tab-${index}`}
+      {...other}
+    >
+      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
+    </div>
+  );
+}
+
+const Dashboard: FunctionComponent = () => {
+  //Used for caching purposes
+  const [companiesCache] = useState<Map<string, IStockVisionCompanyInfo>>(
+    new Map()
+  );
+
+  //Table Data Store
+  const [tableCompaniesMap] = useState<Map<string, IStockVisionCompanyInfo>>(
+    new Map()
+  );
+
+  // Interface for updating table data, small optimization avoids ON + ON -> ON
+  const [tableCompanies, setTableCompanies] = useState<
+    IStockVisionCompanyInfo[]
+  >([]);
+
+  const [currentFormTab, setCurrentFormTab] = useState<number>(0);
+
+  const { addMessage } = useToaster();
+
+  //Not the ideal logic here, we should handle si complex logic on a state manager like Redux
+  const handleSelectedFieldsByName = async (
+    newCompanies: ISearchFormOption[]
+  ) => {
+    try {
+      const newSymbols = newCompanies.map(({ value }) => value);
+
+      const notSavedCompanies: string[] = [];
+
+      newSymbols.forEach((symbol) => {
+        const cachedCompany = companiesCache.get(symbol);
+
+        if (cachedCompany) {
+          tableCompaniesMap.set(cachedCompany.tickerSymbol, cachedCompany);
+
+          return setTableCompanies([...tableCompaniesMap.values()]);
+        }
+
+        notSavedCompanies.push(symbol);
+      });
+
+      if (notSavedCompanies.length === 0) {
+        setTableCompanies([...tableCompaniesMap.values()]);
+        addMessage({
+          severity: "info",
+          message: "Companies or company added.",
+          durationMs: 4500,
+        });
+        return;
+      }
+
+      const symbolsToQuery = notSavedCompanies.join(",");
+
+      const response = await fetch(
+        `api/stocks/company?symbols=${symbolsToQuery}`
+      );
+
+      if (!response.ok) {
+        throw new Error();
+      }
+
+      const { data } =
+        (await response.json()) as ISuccessResponse<TStockVisionCompaniesInfo>;
+
+      if (data.length === 0) {
+        return;
+      }
+
+      data.forEach((companyInfo) => {
+        companiesCache.set(companyInfo.tickerSymbol, companyInfo);
+        tableCompaniesMap.set(companyInfo.tickerSymbol, companyInfo);
+      });
+
+      setTableCompanies([...tableCompaniesMap.values()]);
+      addMessage({
+        severity: "info",
+        message: "Companies or company added.",
+        durationMs: 4500,
+      });
+    } catch (error) {
+      addMessage({
+        severity: "error",
+        message: "Failed to add company or companies.",
+        durationMs: 5000,
+      });
+    }
+  };
+
+  const handleCompanyTableRowRemove = useCallback(
+    (rowId: string) => {
+      const companyToBeRemoved = tableCompaniesMap.get(rowId);
+
+      tableCompaniesMap.delete(rowId);
+      setTableCompanies([...tableCompaniesMap.values()]);
+
+      const companyName = `${companyToBeRemoved!.tickerSymbol} - ${
+        companyToBeRemoved!.companyName
+      } `;
+
+      addMessage({
+        message: `${companyName} company removed.`,
+        severity: "warning",
+        durationMs: 5000,
+      });
+    },
+    [addMessage, tableCompaniesMap]
+  );
+
+  const symbols = tableCompanies.map(({ tickerSymbol }) => tickerSymbol);
+
   return (
     <>
       <Head>
-        <title>Create Next App</title>
-        <meta name="description" content="Generated by create next app" />
+        <title>Stock Vision</title>
+        <meta
+          name="description"
+          content="A Stock Visualization App, Stock Vision."
+        />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className={`${styles.main} ${inter.className}`}>
-        <div className={styles.description}>
-          <p>
-            Get started by editing&nbsp;
-            <code className={styles.code}>src/pages/index.tsx</code>
-          </p>
-          <div>
-            <a
-              href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              By{' '}
-              <Image
-                src="/vercel.svg"
-                alt="Vercel Logo"
-                className={styles.vercelLogo}
-                width={100}
-                height={24}
-                priority
-              />
-            </a>
-          </div>
+
+      <div>
+        <CompanyTable
+          data={tableCompanies}
+          onRowDelete={handleCompanyTableRowRemove}
+        />
+
+        <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+          <Tabs
+            value={currentFormTab}
+            onChange={(_, value) => {
+              setCurrentFormTab(value);
+            }}
+          >
+            <Tab label="Company Search" />
+            <Tab label="Stock Price Search" />
+          </Tabs>
+
+          <TabPanel index={0} value={currentFormTab}>
+            <SearchForm
+              searchLabel="Search by Company Name or Ticker"
+              matchingFieldsLabel=" Matching Companies:"
+              addSelectedFieldsLabel="Add Selected Companies"
+              fetcherProvider={fetchCompanies}
+              onSelectedFields={handleSelectedFieldsByName}
+            />
+          </TabPanel>
+
+          <TabPanel index={1} value={currentFormTab}>
+            {/* Not implemented, theres no easy access endpoint to query this */}
+            <SearchForm
+              searchLabel="Search by Stock Price"
+              matchingFieldsLabel=" Matching Companies:"
+              addSelectedFieldsLabel="Add Selected Companies"
+              fetcherProvider={fetchCompanies}
+              onSelectedFields={console.log}
+              isNumericSearch
+            />
+          </TabPanel>
+        </Box>
+
+        <div className={styles.lineChartContainer}>
+          <RealtimeStockPrice symbols={symbols} />
         </div>
 
-        <div className={styles.center}>
-          <Image
-            className={styles.logo}
-            src="/next.svg"
-            alt="Next.js Logo"
-            width={180}
-            height={37}
-            priority
-          />
-        </div>
-
-        <div className={styles.grid}>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2>
-              Docs <span>-&gt;</span>
-            </h2>
-            <p>
-              Find in-depth information about Next.js features and&nbsp;API.
-            </p>
-          </a>
-
-          <a
-            href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2>
-              Learn <span>-&gt;</span>
-            </h2>
-            <p>
-              Learn about Next.js in an interactive course with&nbsp;quizzes!
-            </p>
-          </a>
-
-          <a
-            href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2>
-              Templates <span>-&gt;</span>
-            </h2>
-            <p>
-              Discover and deploy boilerplate example Next.js&nbsp;projects.
-            </p>
-          </a>
-
-          <a
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2>
-              Deploy <span>-&gt;</span>
-            </h2>
-            <p>
-              Instantly deploy your Next.js site to a shareable URL
-              with&nbsp;Vercel.
-            </p>
-          </a>
-        </div>
-      </main>
+        <Toaster />
+      </div>
     </>
-  )
-}
+  );
+};
+
+export default Dashboard;

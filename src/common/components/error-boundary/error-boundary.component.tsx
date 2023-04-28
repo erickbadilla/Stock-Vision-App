@@ -1,5 +1,4 @@
-import React from 'react';
-import { GeneralErrorPage } from '@pages/error/general-error/general-error.page';
+import React from "react";
 
 interface IErrorBoundaryProp {
   children: React.ReactNode;
@@ -32,7 +31,7 @@ class ErrorBoundary extends React.Component<
     const { children } = this.props;
 
     if (error) {
-      return <GeneralErrorPage />;
+      return <></>;
     }
 
     return children;

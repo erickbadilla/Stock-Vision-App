@@ -30,7 +30,6 @@
     "styled-components": "^5.3.10",
     "swr": "^2.1.5",
     "typescript": "5.0.4",
-    "use-debounce": "^9.0.4",
-    "zod": "^3.21.4"
+    "use-debounce": "^9.0.4"
   }
 }

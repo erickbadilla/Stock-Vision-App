@@ -1,4 +1,4 @@
-import Footer from "@/common/components/footer/footer.component";
+import { Footer } from "@/common/components/footer/footer.component";
 import { NavBar } from "@/common/components/navbar/navbar.component";
 import { FunctionComponent } from "react";
 

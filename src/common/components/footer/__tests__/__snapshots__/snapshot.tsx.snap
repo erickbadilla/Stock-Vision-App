@@ -1,0 +1,20 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders footer component 1`] = `
+<div>
+  <footer
+    class="footer"
+  >
+    <p>
+      © 
+      2023
+       Stock Vision. All Rights Reserved.
+    </p>
+    <p
+      class="footerLastText"
+    >
+      Made with ❤️ by Erick Badilla
+    </p>
+  </footer>
+</div>
+`;

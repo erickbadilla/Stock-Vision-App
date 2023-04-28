@@ -1,0 +1,15 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders tab panel component 1`] = `
+<div>
+  <div
+    aria-labelledby="simple-tab-0"
+    id="simple-tabpanel-0"
+    role="tabpanel"
+  >
+    <div
+      class="MuiBox-root css-19kzrtu"
+    />
+  </div>
+</div>
+`;
